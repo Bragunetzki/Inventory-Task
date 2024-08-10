@@ -5,30 +5,31 @@ public class InventoryModel
 {
     private readonly int gridWidth;
     private readonly int gridHeight;
-    private readonly InventoryItem[,] grid;
+    public InventoryItem[,] Grid { get; private set; }
     
     public InventoryModel(int gridWidth = 10, int gridHeight = 10)
     {
         if (gridWidth <= 0 || gridHeight <= 0) throw new ArgumentException("Grid size must be above zero.");
         this.gridWidth = gridWidth;
         this.gridHeight = gridHeight;
-        grid = new InventoryItem[gridWidth, gridHeight];
+        Grid = new InventoryItem[gridWidth, gridHeight];
     }
 
     public bool AddItem(InventoryItem item, Vector2Int position)
     {
         if (IsPlacementPossible(item, position))
         {
+            RemoveItemIfExists(item);
             int leftX = position.x;
-            int rightX = leftX + item.data.Size.x;
+            int rightX = leftX + item.data.Size.x - 1;
             int topY = position.y;
-            int bottomY = topY + item.data.Size.y;
+            int bottomY = topY + item.data.Size.y - 1;
 
             for (int x = leftX; x <= rightX; x++)
             {
                 for (int y = topY; y <= bottomY; y++)
                 {
-                    grid[x, y] = item;
+                    Grid[x, y] = item;
                 }
             }
             item.InventoryPosition = position;
@@ -37,26 +38,34 @@ public class InventoryModel
         return false;
     }
 
-    public void RemoveItem(Vector2Int position)
+    private void RemoveItemIfExists(InventoryItem item)
+    {
+        if (item.InventoryPosition != null)
+        {
+            RemoveItemAt(item.InventoryPosition);
+        }
+    }
+
+    public void RemoveItemAt(Vector2Int position)
     {
         if (position.x < 0 || position.x >= gridWidth)
             return;
         if (position.y < 0 || position.y >= gridHeight) 
             return;
         
-        InventoryItem item = grid[position.x, position.y];
+        InventoryItem item = Grid[position.x, position.y];
         if (item == null) return;
 
         int leftX = item.InventoryPosition.x;
-        int rightX = leftX + item.data.Size.x;
+        int rightX = leftX + item.data.Size.x - 1;
         int topY = item.InventoryPosition.y;
-        int bottomY = topY + item.data.Size.y;
+        int bottomY = topY + item.data.Size.y - 1;
 
         for (int x = leftX; x <= rightX; x++)
         {
             for (int y = topY; y <= bottomY; y++)
             {
-                grid[x, y] = null;
+                Grid[x, y] = null;
             }
         }
     }
@@ -64,9 +73,9 @@ public class InventoryModel
     private bool IsPlacementPossible(InventoryItem item, Vector2Int position)
     {
         int leftX = position.x;
-        int rightX = leftX + item.data.Size.x;
+        int rightX = leftX + item.data.Size.x - 1;
         int topY = position.y;
-        int bottomY = topY + item.data.Size.y;
+        int bottomY = topY + item.data.Size.y -1;
 
         if (leftX < 0 || rightX < 0 || leftX >= gridWidth || rightX >= gridWidth)
             return false;
@@ -77,7 +86,7 @@ public class InventoryModel
         {
             for (int y = topY; y <= bottomY; y++)
             {
-                if (grid[x, y] != null)
+                if (Grid[x, y] != null && Grid[x, y] != item)
                     return false;
             }
         }
