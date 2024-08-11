@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 public class InventoryView : MonoBehaviour
 {
@@ -10,12 +11,15 @@ public class InventoryView : MonoBehaviour
     [SerializeField] private int cellSpacing = 0;
     [SerializeField] private GridLayoutGroup gridLayoutGroup;
 
-    public event Action<InventoryItem, Vector2Int> ItemDroppedFromInventory;
-    public event Action<InventoryItem, Vector2Int, int> ItemDropedFromList;
-
     private int gridWidth;
     private int gridHeight;
     private InventorySlotView[,] slots;
+    public InventoryEvents Events { get; private set; }
+
+    private void Awake()
+    {
+        Events = new InventoryEvents();
+    }
 
     public void Initialize(int width, int height)
     {
@@ -43,7 +47,7 @@ public class InventoryView : MonoBehaviour
                 InventorySlotView slot = Instantiate(slotPrefab, gridLayoutGroup.transform);
                 slots[x, y] = slot;
                 slot.name = "Slot " + x + "; " + y;
-                slot.Initialize(this, x, y);
+                slot.Initialize(Events, x, y);
             }
         }
     }
@@ -68,15 +72,29 @@ public class InventoryView : MonoBehaviour
                 InventoryItem item = grid[x, y];
                 if (item != null && item.InventoryPosition.x == x && item.InventoryPosition.y == y)
                 {
-                    InventoryItemView itemObject = Instantiate(itemPrefab, transform);
-                    itemObject.Initialize(item, cellSize, cellSpacing);
-
-                    RectTransform itemRectTransform = itemObject.GetComponent<RectTransform>();
-                    itemRectTransform.anchoredPosition = GetSlotPosition(x, y, item.data.Size.x, item.data.Size.y);
-                    itemObject.tag = "Item";
+                    CreateItem(item, x, y);
                 }
             }
         }
+    }
+
+    private void CreateItem(InventoryItem item, int x, int y)
+    {
+        InventoryItemView itemObject = Instantiate(itemPrefab, transform);
+        itemObject.Initialize(item, cellSize, cellSpacing);
+
+        RectTransform itemRectTransform = itemObject.GetComponent<RectTransform>();
+        if (itemRectTransform == null)
+            throw new ArgumentNullException("rect transform not found on the provided item");
+
+        itemRectTransform.anchoredPosition = GetSlotPosition(x, y, item.data.Size.x, item.data.Size.y);
+        itemObject.tag = "Item";
+        itemObject.ItemClicked += OnItemClicked;
+    }
+
+    private void OnItemClicked(InventoryItemView itemView)
+    {
+        Events.NotifyItemClicked(itemView.Item);
     }
 
     private Vector2 GetSlotPosition(int x, int y, int width, int height)
@@ -88,15 +106,5 @@ public class InventoryView : MonoBehaviour
             (y1 - 0.5f * height) * gridLayoutGroup.cellSize.y + gridLayoutGroup.spacing.y * y1
         );
         return slotPosition;
-    }
-
-    public void NotifyItemDroppedFromList(InventoryItem item, Vector2Int inventoryPosition, int index)
-    {
-        ItemDropedFromList?.Invoke(item, inventoryPosition, index);
-    }
-
-    public void NotifyItemDroppedFromInventory(InventoryItem item, Vector2Int inventoryPosition)
-    {
-        ItemDroppedFromInventory?.Invoke(item, inventoryPosition);
     }
 }

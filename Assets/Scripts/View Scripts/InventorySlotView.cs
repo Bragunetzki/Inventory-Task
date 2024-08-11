@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -5,16 +6,16 @@ using UnityEngine.UI;
 public class InventorySlotView : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField]
-    private float brightnessMultiplier = 0.7f;
+    private float brightnessMultiplier = 0.7f;    
     public Vector2Int InventoryPosition { get; private set; }
-    private InventoryView inventoryView;
+    private InventoryEvents inventoryEvents;
     private Image image;
     private UnityEngine.Color initialColor;
 
-    public void Initialize(InventoryView view, int x, int y)
+    public void Initialize(InventoryEvents inventoryEvents, int x, int y)
     {
+        this.inventoryEvents = inventoryEvents;
         InventoryPosition = new Vector2Int(x, y);
-        inventoryView = view;
         image = GetComponent<Image>();
         initialColor = image.color;
     }
@@ -26,11 +27,11 @@ public class InventorySlotView : MonoBehaviour, IDropHandler, IPointerEnterHandl
         {
             if (itemView is ListedItemView listedItemView)
             {
-                inventoryView.NotifyItemDroppedFromList(itemView.Item, InventoryPosition, listedItemView.Index);
+                inventoryEvents.NotifyItemDroppedToInventoryFromList(itemView.Item, InventoryPosition, listedItemView.Index);
             }
             else
             {
-                inventoryView.NotifyItemDroppedFromInventory(itemView.Item, InventoryPosition);
+                inventoryEvents.NotifyItemMovedInInventory(itemView.Item, InventoryPosition);
             }
         }
     }

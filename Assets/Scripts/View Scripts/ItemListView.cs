@@ -10,10 +10,10 @@ public class ItemListView : MonoBehaviour, IDropHandler
     [SerializeField] private int spacing = 5;
     [SerializeField] private int slotSize = 27;
 
-    public event Action<InventoryItem> ItemDropped;
+    public event Action<InventoryItem> ItemDroppedToListFromInventory;
 
     private VerticalLayoutGroup verticalLayoutGroup;
-    private List<ListedItemView> availableItems = new();
+    private readonly List<ListedItemView> availableItems = new();
 
     private void Awake()
     {
@@ -42,7 +42,7 @@ public class ItemListView : MonoBehaviour, IDropHandler
 
     private void NotifyItemDropped(InventoryItem item)
     {
-        ItemDropped?.Invoke(item);
+        ItemDroppedToListFromInventory?.Invoke(item);
     }
 
     public void OnDrop(PointerEventData eventData)

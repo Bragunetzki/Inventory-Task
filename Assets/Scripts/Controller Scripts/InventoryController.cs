@@ -21,29 +21,37 @@ public class InventoryController : MonoBehaviour
         inventoryModel = new InventoryModel(gridWidth, gridHeight);
         itemListModel = new ItemListModel(possibleItems, listSelectionSize);
 
-        inventoryView.ItemDropedFromList += OnItemDroppedFromList;
-        inventoryView.ItemDroppedFromInventory += OnItemDroppedFromInventory;
-        itemListView.ItemDropped += OnItemDroppedToInventory;
+        inventoryView.Events.ItemDropedToInventoryFromList += OnItemDroppedToInventoryFromList;
+        inventoryView.Events.ItemMovedInInventory += OnItemMovedInInventory;
+        inventoryView.Events.ItemClicked += OnItemClicked;
+        itemListView.ItemDroppedToListFromInventory += OnItemDroppedToListFromInventory;
 
         inventoryView.Initialize(gridWidth, gridHeight);
         UpdateViews();
     }
 
-    private void OnItemDroppedFromList(InventoryItem item, Vector2Int invPosition, int index)
+    private void OnItemClicked(InventoryItem item)
+    {
+        inventoryModel.RemoveItemAt(item.InventoryPosition);
+        itemListModel.AddItem(item);
+        UpdateViews();
+    }
+
+    private void OnItemDroppedToInventoryFromList(InventoryItem item, Vector2Int invPosition, int index)
     {
         bool result = inventoryModel.AddItem(item, invPosition);
         if (result) itemListModel.RemoveItemAt(index);
         UpdateViews();
     }
 
-    private void OnItemDroppedFromInventory(InventoryItem item, Vector2Int invPosition)
+    private void OnItemMovedInInventory(InventoryItem item, Vector2Int invPosition)
     {
         inventoryModel.AddItem(item, invPosition);
         var grid = inventoryModel.Grid;
         UpdateViews();
     }
 
-    private void OnItemDroppedToInventory(InventoryItem item)
+    private void OnItemDroppedToListFromInventory(InventoryItem item)
     {
         inventoryModel.RemoveItemAt(item.InventoryPosition);
         itemListModel.AddItem(item);
