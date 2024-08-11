@@ -14,15 +14,17 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IEndDragHandler
 
     private void Awake()
     {
-        rectTransform = GetComponent<RectTransform>();
-        if (rectTransform == null)
+        if (!TryGetComponent(out rectTransform))
         {
             throw new ArgumentNullException("Rect transform not found on drag handler.");
         }
-        canvasGroup = GetComponent<CanvasGroup>();
-        if (canvasGroup == null)
+        if (!TryGetComponent(out canvasGroup))
         {
             throw new ArgumentNullException("Canvas group not found on drag handler.");
+        }
+        if (!TryGetComponent(out itemView))
+        {
+            throw new ArgumentNullException("InventoryItemView not found on drag handler.");
         }
         canvas = GetComponentInParent<Canvas>();
         if (canvas == null)
@@ -30,11 +32,6 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IEndDragHandler
             throw new ArgumentNullException("Canvas not found in parents of drag handler.");
         }
 
-        itemView = GetComponent<InventoryItemView>();
-        if (itemView == null)
-        {
-            throw new ArgumentNullException("InventoryItemView not found on drag handler.");
-        }
     }
 
     public void OnBeginDrag(PointerEventData eventData)

@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 93bff21589c570044ab38e24c7824312, type: 3}
-  m_Name: Item2
+  m_Name: Shovel
   m_EditorClassIdentifier: 
-  itemName: Item2
+  itemName: Shovel
   condition: 1
-  image: {fileID: 0}
-  size: {x: 2, y: 2}
+  image: {fileID: 21300000, guid: 85744a882afe29747b89b7b658609cbe, type: 3}
+  size: {x: 5, y: 2}
