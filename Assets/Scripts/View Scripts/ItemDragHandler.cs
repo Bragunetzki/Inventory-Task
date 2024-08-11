@@ -42,6 +42,8 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         originalPosition = rectTransform.anchoredPosition;
         originalParent = rectTransform.parent;
         canvasGroup.blocksRaycasts = false;
+        transform.SetParent(canvas.transform, true);
+
         Vector2 pivotOffset = new(rectTransform.rect.width * -rectTransform.pivot.x * 0.95f, rectTransform.rect.height * rectTransform.pivot.y * 0.95f);
         RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, eventData.position, eventData.pressEventCamera, out Vector2 localMousePosition);
         rectTransform.anchoredPosition += localMousePosition - pivotOffset;
@@ -50,6 +52,7 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IEndDragHandler
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        transform.SetParent(originalParent, true);
         ReturnToOriginalPosition();
 
         canvasGroup.blocksRaycasts = true;
@@ -69,7 +72,6 @@ public class ItemDragHandler : MonoBehaviour, IBeginDragHandler, IEndDragHandler
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        Debug.Log("Ayo");
         if (!isDragging)
         {
             itemView.NotifyItemClicked();

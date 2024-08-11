@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class InventoryController : MonoBehaviour
@@ -14,11 +15,14 @@ public class InventoryController : MonoBehaviour
 
     private InventoryModel inventoryModel;
     private ItemListModel itemListModel;
+    private string saveFilePath;
 
     // Start is called before the first frame update
     void Start()
     {
         inventoryModel = new InventoryModel(gridWidth, gridHeight);
+        saveFilePath = "inventory.json";
+        inventoryModel.LoadInventory(saveFilePath, possibleItems);
         itemListModel = new ItemListModel(possibleItems, listSelectionSize);
 
         inventoryView.Events.ItemDropedToInventoryFromList += OnItemDroppedToInventoryFromList;
@@ -62,5 +66,10 @@ public class InventoryController : MonoBehaviour
     {
         inventoryView.UpdateView(inventoryModel.Grid);
         itemListView.UpdateView(itemListModel.AvailableItems);
+    }
+
+    private void OnApplicationQuit()
+    {
+        inventoryModel.SaveInventory(saveFilePath);
     }
 }

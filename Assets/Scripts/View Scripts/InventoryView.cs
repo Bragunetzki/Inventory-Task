@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using static UnityEditor.Progress;
@@ -14,7 +15,9 @@ public class InventoryView : MonoBehaviour
     private int gridWidth;
     private int gridHeight;
     private InventorySlotView[,] slots;
+    private readonly List<InventoryItemView> itemViews= new();
     public InventoryEvents Events { get; private set; }
+
 
     private void Awake()
     {
@@ -57,13 +60,11 @@ public class InventoryView : MonoBehaviour
         if (grid.GetLength(0) != gridWidth || (grid.GetLength(0) != 0 && grid.GetLength(1) != gridHeight)) 
             throw new ArgumentException("Data grid size differs from display grid size.");
 
-        foreach (Transform child in transform)
+        foreach (InventoryItemView item in itemViews)
         {
-            if (child != null && child.CompareTag("Item"))
-            {
-                Destroy(child.gameObject);
-            }
+            Destroy(item.gameObject);
         }
+        itemViews.Clear();
 
         for (int x = 0; x < gridWidth; x++)
         {
@@ -82,13 +83,13 @@ public class InventoryView : MonoBehaviour
     {
         InventoryItemView itemObject = Instantiate(itemPrefab, transform);
         itemObject.Initialize(item, cellSize, cellSpacing);
+        itemViews.Add(itemObject);
 
         RectTransform itemRectTransform = itemObject.GetComponent<RectTransform>();
         if (itemRectTransform == null)
             throw new ArgumentNullException("rect transform not found on the provided item");
 
         itemRectTransform.anchoredPosition = GetSlotPosition(x, y, item.data.Size.x, item.data.Size.y);
-        itemObject.tag = "Item";
         itemObject.ItemClicked += OnItemClicked;
     }
 
